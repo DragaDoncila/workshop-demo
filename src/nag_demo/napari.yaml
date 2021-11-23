@@ -1,0 +1,14 @@
+name: nag_demo
+display_name: Workshop Demo
+license: BSD-3-Clause
+entry_point: nag_demo
+
+contributions:
+  commands:
+  - id: nag_demo.get_reader
+    python_name: nag_demo._reader:napari_get_reader
+    title: NAG Reader
+  readers:
+  - command: nag_demo.get_reader
+    accepts_directories: false  
+    filename_patterns: ['*.xfc']
