@@ -8,7 +8,7 @@ contributions:
   - id: nag_demo.get_reader
     python_name: nag_demo._reader:napari_get_reader
     title: NAG Reader
+    
   readers:
   - command: nag_demo.get_reader
-    accepts_directories: false  
-    filename_patterns: ['*.xfc']
+    accepts_directories: true

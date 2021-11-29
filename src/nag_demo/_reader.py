@@ -11,35 +11,45 @@ https://napari.org/docs/dev/plugins/for_plugin_developers.html
 """
 import numpy as np
 from napari_plugin_engine import napari_hook_implementation
+from napari.utils import progress
+import os
+import glob
+import re
+SEQ_REGEX = r'(.*)/([0-9]{2,})'
+GT_REGEX = r'(.*)/([0-9]{2,})_GT/SEG'
 
+SEQ_TIF_REGEX = rf'{SEQ_REGEX}/(t[0-9]{{3}}\.tif)'
+GT_TIF_REGEX = rf'{GT_REGEX}/(man_seg[0-9]{{3}}\.tif)'
 
 # @napari_hook_implementation
-def napari_get_reader(path):
-    """A basic implementation of the napari_get_reader hook specification.
+def napari_get_reader(path):    
+    print("GETTING READER")
+    # TODO: if we return None when opening with specific plugin, error is "no plugin registered named foobar?"
+    # return None
 
-    Parameters
-    ----------
-    path : str or list of str
-        Path to file, or list of paths.
-
-    Returns
-    -------
-    function or None
-        If the path is a recognized format, return a function that accepts the
-        same path or list of paths, and returns a list of layer data tuples.
-    """
-    print("Trying reader...")
-    if isinstance(path, list):
-        # reader plugins may be handed single path, or a list of paths.
-        # if it is a list, it is assumed to be an image stack...
-        # so we are only going to look at the first file.
-        path = path[0]
-
-    # # if we know we cannot read the file, we immediately return None.
-    if not path.endswith(".xfc"):
+    path = os.path.abspath(path)
+    # we want a folder not an individual tiff
+    if not os.path.isdir(path):
         return None
 
-    # otherwise we return the *function* that can read ``path``.
+    # dirname either a sequence or a GT/SEG
+    is_gt = re.match(GT_REGEX, path)
+    if not is_gt:
+        is_seq = re.match(SEQ_REGEX, path)
+        if not is_seq:
+            return None
+
+    # need to be able to find either sequence tifs or seg GT tifs
+    all_tifs = glob.glob(path + '/*.tif')
+    if not is_gt:
+        is_seq_tifs = all([re.match(SEQ_TIF_REGEX, pth) for pth in all_tifs])
+        if not is_seq_tifs:
+            return None
+
+    is_gt_tifs = all([re.match(GT_TIF_REGEX, pth) for pth in all_tifs])
+    if not is_gt_tifs:
+        return None
+
     return reader_function
 
 
@@ -65,15 +75,11 @@ def reader_function(path):
         Both "meta", and "layer_type" are optional. napari will default to
         layer_type=="image" if not provided
     """
-    # handle both a string and a list of strings
-    paths = [path] if isinstance(path, str) else path
-    # load all files into array
-    arrays = [np.load(_path) for _path in paths]
-    # stack arrays into single array
-    data = np.squeeze(np.stack(arrays))
+    print("READING")
 
     # optional kwargs for the corresponding viewer.add_* method
     add_kwargs = {}
 
     layer_type = "image"  # optional, default is "image"
+    data = np.random.random((100, 100))
     return [(data, add_kwargs, layer_type)]
