@@ -76,11 +76,26 @@ def napari_get_reader(path):
 
 @dask.delayed
 def read_im(tif_pth):
+    """Delayed func to read each individual tif into a numpy array"""
     with tifffile.TiffFile(tif_pth) as im_tif:
         im = im_tif.pages[0].asarray()
     return im
 
 def read_tifs(path, tif_regex, n_frames):
+    """Read all tifs at path matching tif_regex into delayed dask stack.
+
+    If n_frames is given, places GT labels at the appropriate indices
+    in the larger time sequence. Otherwise, reads labels into one
+    contiguous sequence.
+
+    :param path: path containing tifs
+    :type path: str
+    :param tif_regex: regex matching GT or sequence tracking chalenge tiffs
+    :type tif_regex: regex str
+    :param n_frames: number of total frames in the sequence
+    :type n_frames: int
+    :return: nd dask array
+    """
     # TODO: if we take more than one sequence
     # read tifs using tifffile.open etc. in a dask delayed function
     all_tifs = sorted([pth for pth in glob.glob(path + '/*.tif') if re.match(tif_regex, pth)])
