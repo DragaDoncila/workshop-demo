@@ -9,17 +9,23 @@ see: https://napari.org/docs/dev/plugins/hook_specifications.html
 Replace code below accordingly.  For complete documentation see:
 https://napari.org/docs/dev/plugins/for_plugin_developers.html
 """
-import numpy as np
-from napari_plugin_engine import napari_hook_implementation
+import warnings
 from napari.utils import progress
 import os
 import glob
 import re
-SEQ_REGEX = r'(.*)/([0-9]{2,})'
-GT_REGEX = r'(.*)/([0-9]{2,})_GT/SEG'
+import dask
+import dask.array as da
+from napari_plugin_engine import napari_hook_implementation
+from pathlib import Path
+import numpy as np
+import tifffile
 
-SEQ_TIF_REGEX = rf'{SEQ_REGEX}/(t[0-9]{{3}}{"."}tif)'
-GT_TIF_REGEX = rf'{GT_REGEX}/(man_seg[0-9]{{3}}{"."}tif)'
+SEQ_REGEX = r'(.*)/([0-9]{2,})$'
+GT_REGEX = r'(.*)/([0-9]{2,})_GT/SEG$'
+
+SEQ_TIF_REGEX = rf'{SEQ_REGEX[:-1]}/t([0-9]{{3}}){"."}tif$'
+GT_TIF_REGEX = rf'{GT_REGEX[:-1]}/man_seg([0-9]{{3}}){"."}tif$'
 
 # @napari_hook_implementation
 def napari_get_reader(path):
@@ -68,9 +74,37 @@ def napari_get_reader(path):
 
     return reader_function
 
+@dask.delayed
+def read_im(tif_pth):
+    with tifffile.TiffFile(tif_pth) as im_tif:
+        im = im_tif.pages[0].asarray()
+    return im
+
+def read_tifs(path, tif_regex, n_frames):
+    # TODO: if we take more than one sequence
+    # read tifs using tifffile.open etc. in a dask delayed function
+    all_tifs = sorted([pth for pth in glob.glob(path + '/*.tif') if re.match(tif_regex, pth)])
+    tif_shape = None
+    tif_dtype = None
+    with tifffile.TiffFile(all_tifs[0]) as im_tif:
+        tif_shape = im_tif.pages[0].shape
+        tif_dtype = im_tif.pages[0].dtype
+
+    # each tiff needs to be stacked into a big dask array
+    if not n_frames:
+        n_frames = len(all_tifs)
+    im_stack = [np.zeros(shape=tif_shape, dtype=tif_dtype) for _ in range(n_frames)]
+
+    for tif_pth in progress(all_tifs):
+        frame_index = int(re.match(tif_regex, tif_pth).groups()[-1])
+        im = da.from_delayed(read_im(tif_pth), shape=tif_shape, dtype=tif_dtype)
+        im_stack[frame_index] = im
+    layer_data = da.stack(im_stack)
+
+    return layer_data
 
 def reader_function(path):
-    """Take a path or list of paths and return a list of LayerData tuples.
+    """Reads valid tracking challenge tifs at path into napari as layers.
 
     Readers are expected to return data as a list of tuples, where each tuple
     is (data, [add_kwargs, [layer_type]]), "add_kwargs" and "layer_type" are
@@ -93,9 +127,27 @@ def reader_function(path):
     """
     print("READING")
 
+    gt_match = re.match(GT_REGEX, path)
+    is_gt = bool(gt_match)
+
+    max_frames = None
+    layer_type = "image"
+    pth_regex = SEQ_TIF_REGEX
+    if is_gt:
+        # we need to know the number of frames to spread this over, so we look for the sister sequence
+        parent_dir_pth = Path(path).parent.parent.absolute()
+        sister_sequence_pth = os.path.join(parent_dir_pth, gt_match.groups()[1])
+        if not os.path.exists(sister_sequence_pth):
+            warnings.warn(f"Can't find image for ground truth at {path}. Reading without knowing number of frames...")
+        else:
+            latest_tif_pth = sorted(glob.glob(sister_sequence_pth + '/*.tif'))[-1]
+            max_frames = int(re.match(SEQ_TIF_REGEX, latest_tif_pth).groups()[-1]) + 1
+        layer_type = "labels"
+        pth_regex = GT_TIF_REGEX
+
+    layer_data = read_tifs(path, pth_regex, max_frames)
+
     # optional kwargs for the corresponding viewer.add_* method
     add_kwargs = {}
 
-    layer_type = "image"  # optional, default is "image"
-    data = np.random.random((100, 100))
-    return [(data, add_kwargs, layer_type)]
+    return [(layer_data, add_kwargs, layer_type)]
