@@ -27,7 +27,7 @@ from nag_demo import napari_get_reader
 def test_get_reader_seq_pass(tmpdir):
     """Valid dir of sequence tiffs"""
     seq = tmpdir.mkdir('01')
-    seq.join('000.tif')
+    seq.join('t000.tif').write('test')
 
     reader = napari_get_reader(seq)
     assert callable(reader)
@@ -35,28 +35,29 @@ def test_get_reader_seq_pass(tmpdir):
 def test_get_reader_gt_pass(tmpdir):
     """Valid dir of GT tiffs"""
     seq = tmpdir.mkdir('01_GT').mkdir('SEG')
-    seq.join('man_seg000.tif')
+    seq.join('man_seg000.tif').write('test')
     
     reader = napari_get_reader(seq)
     assert callable(reader)
 
 def test_get_reader_not_dir_fail(tmpdir):
     """Not receiving a directory"""
-    seq = tmpdir.mkdir('01').join('000.tif')
+    seq = tmpdir.mkdir('01').join('t000.tif')
     reader = napari_get_reader(seq)
 
     assert reader is None
 
 def test_get_reader_wrong_dir_name_fail(tmpdir):
     """Directory incorrectly named"""
-    seq = tmpdir.mkdir('foobar').join('000.tif')
+    seq = tmpdir.mkdir('foobar').join('t000.tif')
     reader = napari_get_reader(seq)
 
     assert reader is None
     
 def test_get_reader_mix_tif_fail(tmpdir):
+    """Directory ok but tifs are not named by expected sequence"""
     seq = tmpdir.mkdir('01')
-    seq.join('000.tif').write('test')
+    seq.join('t000.tif').write('test')
     seq.join('foobar.tif').write('test')
 
     reader = napari_get_reader(seq)
@@ -70,9 +71,14 @@ def test_get_reader_mix_dir_fail(tmpdir):
     assert reader is None
 
     seq = tmpdir.mkdir('01_GT')
-    seq.join('000.tif').write('test')
+    seq.join('t000.tif').write('test')
     reader = napari_get_reader(seq)
     assert reader is None
 
 def test_get_reader_no_tif_fail(tmpdir):
-    pass
+    """Directory is ok but no tifs are present"""
+    seq = tmpdir.mkdir('01')
+    seq.join('not_a_tif.jpg').write('test')
+
+    reader = napari_get_reader(seq)
+    assert reader is None

@@ -18,11 +18,22 @@ import re
 SEQ_REGEX = r'(.*)/([0-9]{2,})'
 GT_REGEX = r'(.*)/([0-9]{2,})_GT/SEG'
 
-SEQ_TIF_REGEX = rf'{SEQ_REGEX}/(t[0-9]{{3}}\.tif)'
-GT_TIF_REGEX = rf'{GT_REGEX}/(man_seg[0-9]{{3}}\.tif)'
+SEQ_TIF_REGEX = rf'{SEQ_REGEX}/(t[0-9]{{3}}{"."}tif)'
+GT_TIF_REGEX = rf'{GT_REGEX}/(man_seg[0-9]{{3}}{"."}tif)'
 
 # @napari_hook_implementation
-def napari_get_reader(path):    
+def napari_get_reader(path):
+    """Returns reader if path contains valid tracking challenge tifs else None.
+
+    Validates contents of path (which needs to be a directory) to either be
+    test 2D+time sequences or segmentation Gold Standard Truth as per tracking
+    challenge specifications:
+    https://public.celltrackingchallenge.net/documents/Naming%20and%20file%20content%20conventions.pdf
+
+    :param path: path to be opened by reader
+    :type path: str
+    :return: reader function or None
+    """
     print("GETTING READER")
     # TODO: if we return None when opening with specific plugin, error is "no plugin registered named foobar?"
     # return None
@@ -41,9 +52,14 @@ def napari_get_reader(path):
 
     # need to be able to find either sequence tifs or seg GT tifs
     all_tifs = glob.glob(path + '/*.tif')
+    if not all_tifs:
+        return None
+        
     if not is_gt:
         is_seq_tifs = all([re.match(SEQ_TIF_REGEX, pth) for pth in all_tifs])
-        if not is_seq_tifs:
+        if is_seq_tifs:
+            return reader_function
+        else:
             return None
 
     is_gt_tifs = all([re.match(GT_TIF_REGEX, pth) for pth in all_tifs])
