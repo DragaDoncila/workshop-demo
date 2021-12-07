@@ -1,6 +1,5 @@
 name: nag_demo
 display_name: Workshop Demo
-license: BSD-3-Clause
 entry_point: nag_demo
 
 contributions:
@@ -8,7 +7,24 @@ contributions:
   - id: nag_demo.get_reader
     python_name: nag_demo._reader:napari_get_reader
     title: NAG Reader
-    
+  - id: nag_demo.get_segment_widget
+    python_name: nag_demo._dock_widget:get_segment_widget
+    title: Segment by Thresholding Title
+  - id: nag_demo.get_highlight_widget
+    python_name: nag_demo._dock_widget:get_highlight_widget
+    title: Highlight Segmentation Differences Title
+  - id: nag_demo.zip_writer
+    python_name: nag_demo._writer:writer_function
+    title: tracking challenge save to zip
   readers:
   - command: nag_demo.get_reader
     accepts_directories: true
+  widgets:
+  - command: nag_demo.get_segment_widget
+    name: Segment by Thresholding
+  - command: nag_demo.get_highlight_widget 
+    name: Highlight Segmentation Differences
+  writers:
+  - command: nag_demo.zip_writer
+    layer_types: ["image*", "labels*"]
+    name: tracking challenge save to zip

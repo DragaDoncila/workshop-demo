@@ -109,6 +109,9 @@ class SegmentationDiffHighlight(QWidget):
     # document
     # test
 
-@napari_hook_implementation
-def napari_experimental_provide_dock_widget():
-    return [segment_by_threshold, SegmentationDiffHighlight]
+# @napari_hook_implementation(specname='napari_experimental_provide_dock_widget')
+def get_segment_widget():
+    return segment_by_threshold 
+    
+def get_highlight_widget():
+    return SegmentationDiffHighlight
