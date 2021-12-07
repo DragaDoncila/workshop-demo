@@ -148,6 +148,7 @@ def reader_function(path):
     max_frames = None
     layer_type = "image"
     pth_regex = SEQ_TIF_REGEX
+    layer_name = "tracking_data"
     if is_gt:
         # we need to know the number of frames to spread this over, so we look for the sister sequence
         parent_dir_pth = Path(path).parent.parent.absolute()
@@ -159,10 +160,11 @@ def reader_function(path):
             max_frames = int(re.match(SEQ_TIF_REGEX, latest_tif_pth).groups()[-1]) + 1
         layer_type = "labels"
         pth_regex = GT_TIF_REGEX
+        layer_name = 'ground_truth'
 
     layer_data = read_tifs(path, pth_regex, max_frames)
 
     # optional kwargs for the corresponding viewer.add_* method
-    add_kwargs = {}
+    add_kwargs = {'name': layer_name}
 
     return [(layer_data, add_kwargs, layer_type)]
