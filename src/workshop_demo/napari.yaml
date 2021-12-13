@@ -1,0 +1,38 @@
+name: workshop-demo # should be package name
+display_name: Workshop Demo # will also be used on the hub soon
+entry_point: workshop_demo # needed for activation function (mostly default) point it to module
+
+contributions:
+  commands:
+  - id: workshop-demo.get_reader
+    python_name: workshop_demo._reader:napari_get_reader
+    title: NAG Reader
+
+  - id: workshop-demo.get_segment_widget
+    python_name: workshop_demo._dock_widget:segment_by_threshold
+    title: Segment by Thresholding Title
+  - id: workshop-demo.get_highlight_widget
+    python_name: workshop_demo._dock_widget:SegmentationDiffHighlight
+    # doesn't show up anywhere right now but could be used for searching/filtering
+    # what does the COMMAND do, not the action tied to the command e.g Open Highlight Widget
+    title: Highlight Segmentation Differences Title
+
+  - id: workshop-demo.zip_writer
+    python_name: workshop_demo._writer:writer_function
+    title: tracking challenge save to zip
+
+  readers:
+  - command: workshop-demo.get_reader
+    accepts_directories: true
+    filename_patterns: []
+
+  widgets:
+  - command: workshop-demo.get_segment_widget
+    display_name: Segment by Thresholding
+  - command: workshop-demo.get_highlight_widget 
+    display_name: Highlight Segmentation Differences
+
+  writers:
+  - command: workshop-demo.zip_writer
+    layer_types: ["image*", "labels*"]
+    display_name: tracking challenge save to zip
