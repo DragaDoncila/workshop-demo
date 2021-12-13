@@ -1,30 +1,38 @@
-name: nag_demo
-display_name: Workshop Demo
-entry_point: nag_demo
+name: nagdemo # should be package name
+display_name: Workshop Demo # will also be used on the hub soon
+entry_point: nag_demo # needed for activation function (mostly default) point it to module
 
 contributions:
   commands:
-  - id: nag_demo.get_reader
+  - id: nagdemo.get_reader
     python_name: nag_demo._reader:napari_get_reader
     title: NAG Reader
-  - id: nag_demo.get_segment_widget
-    python_name: nag_demo._dock_widget:get_segment_widget
+
+  - id: nagdemo.get_segment_widget
+    python_name: nag_demo._dock_widget:segment_by_threshold
     title: Segment by Thresholding Title
-  - id: nag_demo.get_highlight_widget
-    python_name: nag_demo._dock_widget:get_highlight_widget
+  - id: nagdemo.get_highlight_widget
+    python_name: nag_demo._dock_widget:SegmentationDiffHighlight
+    # doesn't show up anywhere right now but could be used for searching/filtering
+    # what does the COMMAND do, not the action tied to the command e.g Open Highlight Widget
     title: Highlight Segmentation Differences Title
-  - id: nag_demo.zip_writer
+
+  - id: nagdemo.zip_writer
     python_name: nag_demo._writer:writer_function
     title: tracking challenge save to zip
+
   readers:
-  - command: nag_demo.get_reader
+  - command: nagdemo.get_reader
     accepts_directories: true
+    filename_patterns: []
+
   widgets:
-  - command: nag_demo.get_segment_widget
-    name: Segment by Thresholding
-  - command: nag_demo.get_highlight_widget 
-    name: Highlight Segmentation Differences
+  - command: nagdemo.get_segment_widget
+    display_name: Segment by Thresholding
+  - command: nagdemo.get_highlight_widget 
+    display_name: Highlight Segmentation Differences
+
   writers:
-  - command: nag_demo.zip_writer
+  - command: nagdemo.zip_writer
     layer_types: ["image*", "labels*"]
-    name: tracking challenge save to zip
+    display_name: tracking challenge save to zip
