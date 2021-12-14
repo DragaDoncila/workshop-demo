@@ -45,6 +45,7 @@ def segment_by_threshold(img_layer: "napari.layers.Image", threshold: Threshold)
         tuple of (data, meta, 'labels') for consumption by napari
     """
     with progress(total=0):
+        # need to use threshold.value to get the function from the enum member
         threshold_val = threshold.value(img_layer.data.compute())
         binarised_im = img_layer.data > threshold_val
         seg_labels = da.from_array(label(binarised_im))
