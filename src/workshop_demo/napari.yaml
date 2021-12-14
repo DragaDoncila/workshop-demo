@@ -1,6 +1,5 @@
 name: workshop-demo # should be package name
 display_name: Workshop Demo # will also be used on the hub soon
-entry_point: workshop_demo # needed for activation function (mostly default) point it to module
 
 contributions:
   commands:
