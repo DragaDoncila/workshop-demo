@@ -17,8 +17,8 @@ contributions:
     # what does the COMMAND do, not the action tied to the command e.g Open Highlight Widget
     title: Highlight Segmentation Differences Title
 
-  - id: workshop-demo.zip_writer
-    python_name: workshop_demo._writer:writer_function
+  - id: workshop-demo.write_labels
+    python_name: workshop_demo._writer:labels_to_zip
     title: tracking challenge save to zip
 
   readers:
@@ -33,6 +33,7 @@ contributions:
     display_name: Highlight Segmentation Differences
 
   writers:
-  - command: workshop-demo.zip_writer
-    layer_types: ["image*", "labels*"]
-    display_name: tracking challenge save to zip
+  - command: workshop-demo.write_labels
+    layer_types: ["labels*"]
+    filename_extensions: [".zip"] 
+    display_name: label zipper

@@ -1,62 +1,79 @@
 """
 This module is an example of a barebones writer plugin for napari
-
-It implements the ``napari_get_writer`` and ``napari_write_image`` hook specifications.
-see: https://napari.org/docs/dev/plugins/hook_specifications.html
-
-Replace code below according to your needs
 """
 
 from typing import List
-from napari_plugin_engine import napari_hook_implementation
 import os
-from ._constants import SEQ_REGEX, GT_REGEX
-import re
 from tifffile import imsave
-from shutil import make_archive
-from napari.utils import progress
+from shutil import make_archive, rmtree
 from napari.qt import thread_worker
 
-# @napari_hook_implementation
-def napari_get_writer(path: str, layer_types: List[str]):
-    # we can only write labels or images to tiffs
-    filtered_types = filter(lambda l_type: l_type == 'labels' or l_type == 'image', layer_types)
-    if not filtered_types:
-        return None
-
-    # only writing to zip
-    if not path.endswith('.zip'):
-        return None
-
-    return writer_function
-
 @thread_worker(
+    # give us an indeterminate progress bar
     progress=True
 )
 def write_tiffs(data, dir_pth):
+    """Given 2D+T data array, write each slice to individual tif.
+
+    This operation is threaded.
+
+    Parameters
+    ----------
+    data : ArrayLike
+        2D+T data to write to files 
+    dir_pth : str
+        path to existing folder to hold tiffs
+    """
     for i, t_slice in enumerate(data):
-        # write sequence of tiffs to folder
-        tiff_nme = f't{str(i).zfill(3)}.tif'
+        tiff_nme = f'seg{str(i).zfill(3)}.tif'
         tiff_pth = os.path.join(dir_pth, tiff_nme)
         imsave(tiff_pth, t_slice)
 
-def writer_function(path: str, layer_data_tuples: List["napari.types.LayerDataTuple"]) -> List[str]:
+
+def labels_to_zip(path: str, layer_data_tuples: List["napari.types.LayerDataTuple"]) -> List[str]:
+    """Save all 2D+T labels layers folder of individual 2D tiffs and zip. 
+
+    Parameters
+    ----------
+    path : str
+        path to save layers to
+    layer_data_tuples : List[napari.types.LayerDataTuple]
+        list of (data, meta, layer_type) layer tuples to save
+
+    Returns
+    -------
+    List[str] | None
+        path to save to or None if layers can't be saved
+    """
+
+    # strip file extension so we can make directory
     if path.endswith('.zip'):
         path = path[:-4]
 
-    layers_to_write = list(filter(lambda lyr: lyr[2] == 'labels' or lyr[2] == 'image', layer_data_tuples))
+    layers_to_write = list(filter(lambda lyr: lyr[2] == 'labels', layer_data_tuples))
+
+    # we need each layer's data to be 3D
+    if not all([layer_tuple[0].ndim == 3 for layer_tuple in layers_to_write]):
+        return None
     
+    # we will use this function to zip up the folder once all tiffs are written
+    def zip_dir():
+        """Make zip file from directory at path"""
+        make_archive(path, 'zip', path)
+        # clean up directory after ourselves
+        rmtree(path)    
+
     os.mkdir(path)
-    # for each layer
     for (data, meta, layer_type) in layers_to_write:
-        # make folder with layer name name
-        layer_dir_pth = os.path.join(path, meta['name'])
-        os.mkdir(layer_dir_pth)
+        # use correct folder structure so that our reader can read it
+        layer_dir_pth = os.path.join(path, f'01_AUTO/SEG')
+        os.makedirs(layer_dir_pth)
         if len(data.shape) == 2:
             data = [data]
         worker = write_tiffs(data, layer_dir_pth)
         worker.start()
+        # once this worker is done we zip up the folder
+        worker.finished.connect(zip_dir)
 
-    # zip folder (?)
-    pth = make_archive(path, 'zip', path)
-    return pth 
+    # returning path even though worker may not be finished - cheeky...
+    return path + '.zip'

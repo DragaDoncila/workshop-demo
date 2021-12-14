@@ -143,7 +143,7 @@ def reader_function(path):
 
     layer_data = read_tifs(path, n_frames)
     layer_type = "labels"
-    layer_name = 'ground_truth'
+    layer_name = f"{gt_match.group(2)}{gt_match.group(3)}"
 
     # optional kwargs for the corresponding viewer.add_* method 
     #    e.g. name, colormap, scale, etc.
