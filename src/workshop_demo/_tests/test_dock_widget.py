@@ -1,18 +1,46 @@
-import nag_demo
+from workshop_demo import segment_by_threshold, SegmentationDiffHighlight, Threshold
 import pytest
+import dask.array as da
+from napari.layers import Image, Labels
+from qtpy.QtCore import Qt
 
-# this is your plugin name declared in your napari.plugins entry point
-MY_PLUGIN_NAME = "nag-demo"
-# the name of your widget(s)
-MY_WIDGET_NAMES = ["Example Q Widget", "example_magic_widget"]
+@pytest.fixture
+def im_layer():
+    return Image(da.random.random((5, 100, 100)), name='im')
 
+@pytest.fixture
+def labels_layer():
+    return Labels(da.random.randint(0, 255, (5, 100, 100)), name='lab')
 
-@pytest.mark.parametrize("widget_name", MY_WIDGET_NAMES)
-def test_something_with_viewer(widget_name, make_napari_viewer, napari_plugin_manager):
-    napari_plugin_manager.register(nag_demo, name=MY_PLUGIN_NAME)
+def test_segment_widg_returns_layer(im_layer, labels_layer):
+    widg = segment_by_threshold()
+    
+    retval = widg(im_layer, Threshold.triangle)
+    assert isinstance(retval[0], da.Array)
+    assert retval[1]['name'] == 'im_seg'
+    assert retval[2] == 'labels'
+
+def test_highlight_widg_populates_layers(make_napari_viewer, labels_layer, im_layer):
     viewer = make_napari_viewer()
-    num_dw = len(viewer.window._dock_widgets)
-    viewer.window.add_plugin_dock_widget(
-        plugin_name=MY_PLUGIN_NAME, widget_name=widget_name
-    )
-    assert len(viewer.window._dock_widgets) == num_dw + 1
+    widg = SegmentationDiffHighlight(viewer)
+
+    assert widg.gt_layer_combo.count() == 0
+    assert widg.seg_layer_combo.count() == 0
+
+    viewer.add_layer(labels_layer)
+    viewer.add_layer(im_layer)
+    assert widg.gt_layer_combo.count() == 1
+    assert widg.gt_layer_combo.currentText() == 'lab'
+    assert widg.seg_layer_combo.count() == 1
+    assert widg.seg_layer_combo.currentText() == 'lab'
+
+def test_highlight_widg_computes_difference(make_napari_viewer, labels_layer, qtbot):
+    viewer = make_napari_viewer()
+    widg = SegmentationDiffHighlight(viewer)
+    viewer.add_layer(labels_layer)
+    assert len(viewer.layers) == 1
+
+    qtbot.mouseClick(widg.highlight_btn, Qt.MouseButton.LeftButton)
+
+    assert len(viewer.layers) == 2
+    

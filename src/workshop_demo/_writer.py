@@ -47,13 +47,17 @@ def labels_to_zip(path: str, layer_data_tuples: List["napari.types.LayerDataTupl
     """
 
     # strip file extension so we can make directory
-    if path.endswith('.zip'):
-        path = path[:-4]
+    if str(path).endswith('.zip'):
+        path = str(path)[:-4]
 
     layers_to_write = list(filter(lambda lyr: lyr[2] == 'labels', layer_data_tuples))
+    # we're only writing one layer
+    if not len(layers_to_write) == 1:
+        return None
 
-    # we need each layer's data to be 3D
-    if not all([layer_tuple[0].ndim == 3 for layer_tuple in layers_to_write]):
+    # we need layer's data to be 3D
+    layer = layers_to_write[0]
+    if not layer[0].ndim == 3:
         return None
     
     # we will use this function to zip up the folder once all tiffs are written
@@ -64,16 +68,16 @@ def labels_to_zip(path: str, layer_data_tuples: List["napari.types.LayerDataTupl
         rmtree(path)    
 
     os.mkdir(path)
-    for (data, meta, layer_type) in layers_to_write:
-        # use correct folder structure so that our reader can read it
-        layer_dir_pth = os.path.join(path, f'01_AUTO/SEG')
-        os.makedirs(layer_dir_pth)
-        if len(data.shape) == 2:
-            data = [data]
-        worker = write_tiffs(data, layer_dir_pth)
-        worker.start()
-        # once this worker is done we zip up the folder
-        worker.finished.connect(zip_dir)
+    data, _, _ = layers_to_write[0]
+    # use correct folder structure so that our reader can read it
+    layer_dir_pth = os.path.join(path, f'01_AUTO/SEG')
+    os.makedirs(layer_dir_pth)
+    if len(data.shape) == 2:
+        data = [data]
+    worker = write_tiffs(data, layer_dir_pth)
+    worker.start()
+    # once this worker is done we zip up the folder
+    worker.finished.connect(zip_dir)
 
     # returning path even though worker may not be finished - cheeky...
     return path + '.zip'
