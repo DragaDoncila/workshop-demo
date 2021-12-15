@@ -6,10 +6,12 @@ structure similar to that of tracking challenge data.
 
 import os
 from shutil import make_archive, rmtree
-from typing import List
+from typing import Any, Dict, List
 
 from napari.qt import thread_worker
 from tifffile import imsave
+
+import numpy as np
 
 
 @thread_worker(
@@ -36,7 +38,7 @@ def write_tiffs(data, dir_pth):
 
 # our manifest writer command points to this function.
 def labels_to_zip(
-    path: str, layer_data_tuples: List["napari.types.LayerDataTuple"]
+    path: str, data: np.typing.ArrayLike, meta: Dict[str, Any]
 ) -> List[str]:
     """Save all 2D+T labels layers folder of individual 2D tiffs and zip.
 
@@ -57,14 +59,7 @@ def labels_to_zip(
     if str(path).endswith(".zip"):
         path = str(path)[:-4]
 
-    layers_to_write = list(filter(lambda lyr: lyr[2] == "labels", layer_data_tuples))
-    # we're only writing one layer
-    if not len(layers_to_write) == 1:
-        return None
-
-    # we need layer's data to be 3D
-    layer = layers_to_write[0]
-    if not layer[0].ndim == 3:
+    if not data.ndim == 3:
         return None
 
     # we will use this function to zip up the folder once all tiffs are written
@@ -75,7 +70,6 @@ def labels_to_zip(
         rmtree(path)
 
     os.mkdir(path)
-    data, _, _ = layers_to_write[0]
     # use correct folder structure so that our reader can read it
     layer_dir_pth = os.path.join(path, f"01_AUTO/SEG")
     os.makedirs(layer_dir_pth)

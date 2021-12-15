@@ -29,11 +29,11 @@ contributions:
   widgets:
   - command: workshop-demo.get_segment_widget
     display_name: Segment by Thresholding # shown in plugin menu
-  - command: workshop-demo.get_highlight_widget 
+  - command: workshop-demo.get_highlight_widget
     display_name: Highlight Segmentation Differences
 
   writers:
   - command: workshop-demo.write_labels
-    layer_types: ["labels*"]
-    filename_extensions: [".zip"] 
+    layer_types: ["labels"]
+    filename_extensions: [".zip"]
     display_name: label zipper # shown in file save dialog
