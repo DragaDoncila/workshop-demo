@@ -1,92 +1,56 @@
+## What is this?
 
+This plugin was created to serve as a semi-meaningful example of a plugin using
+the new napari [npe2](https://pypi.org/project/npe2/) architecture.
 
-<!-- This file is designed to provide you with a starting template for documenting
-the functionality of your plugin. Its content will be rendered on your plugin's
-napari hub page.
+It provides a reader, a writer and two dock widgets to support opening, processing
+and writing out [cell tracking challenge](https://celltrackingchallenge.net/) data.
 
-The sections below are given as a guide for the flow of information only, and
-are in no way prescriptive. You should feel free to merge, remove, add and 
-rename sections at will to make this document work best for your plugin. 
+We've provided comments and example tests that can be used as a reference
+when building your own plugin.
 
-# Description
+## Using this plugin
 
-This should be a detailed description of the context of your plugin and its 
-intended purpose.
+### Sample Data
+You can download sample data for this plugin from the tracking challenge website. Any 2D+T
+sequence should work, but this plugin has been tested only with the 
+[Human hepatocarcinoma-derived cells expressing the fusion protein YFP-TIA-1](http://data.celltrackingchallenge.net/training-datasets/Fluo-C2DL-Huh7.zip) 
+dataset.
+### Reading Data
+This plugin's reader is designed for tracking challenge segmentation gold standard ground truth
+data conforming to the file format described in the [data specification](https://public.celltrackingchallenge.net/documents/Naming%20and%20file%20content%20conventions.pdf).
 
-If you have videos or screenshots of your plugin in action, you should include them
-here as well, to make them front and center for new users. 
+Ground truth data is only provided for a subset of the frames of the entire sequence. This
+reader will attempt to find the number of frames of the associated sequence in a sister
+directory of the ground truth data directory and open a labels layer with the same number
+of frames, thus ensuring the labelled data is correctly overlaid onto the original sequence.
 
-You should use absolute links to these assets, so that we can easily display them 
-on the hub. The easiest way to include a video is to use a GIF, for example hosted
-on imgur. You can then reference this GIF as an image.
+<!-- Movie here -->
 
-![Example GIF hosted on Imgur](https://i.imgur.com/A5phCX4.gif)
+### Segmenting Data
+One of the dock widgets provided by this plugin is "Segment by Threshold". The widget
+allows you to select a 2D+T image layer in the viewer (e.g. any of the sequences in the Human 
+hepatocarcinoma dataset above) and segment it using a selection of scikit-image thresholding functions.
 
-Note that GIFs larger than 5MB won't be rendered by GitHub - we will however,
-render them on the napari hub.
+The segmentation is then returned as a `Labels` layer into the viewer.
 
-The other alternative, if you prefer to keep a video, is to use GitHub's video
-embedding feature.
+<!-- Movie here -->
 
-1. Push your `DESCRIPTION.md` to GitHub on your repository (this can also be done
-as part of a Pull Request)
-2. Edit `.napari/DESCRIPTION.md` **on GitHub**.
-3. Drag and drop your video into its desired location. It will be uploaded and
-hosted on GitHub for you, but will not be placed in your repository.
-4. We will take the resolved link to the video and render it on the hub.
+### Highlighting Segmentation Differences
+The second dock widget provided by this plugin allows you to visually compare your segmentation
+against the ground truth data by computing the difference between the two and adding this as a
+layer in the napari viewer.
 
-Here is an example of an mp4 video embedded this way.
+To use this widget, open it from the Plugins menu and select the two layers you wish to compare.
 
-https://user-images.githubusercontent.com/17995243/120088305-6c093380-c132-11eb-822d-620e81eb5f0e.mp4
+<!-- Movie here -->
 
-# Intended Audience & Supported Data
+### Writing to Zip
+Finally, you can save your segmentation to a zip file whose internal directory structure
+will closely mimic that of the tracking challenge datasets, so that it may be opened 
+again in the viewer.
 
-This section should describe the target audience for this plugin (any knowledge,
-skills and experience required), as well as a description of the types of data
-supported by this plugin.
+To save your layer, choose File -> Save selected layer(s) with *one* labels layer selected,
+then select label zipper from the dropdown choices.
 
-Try to make the data description as explicit as possible, so that users know the
-format your plugin expects. This applies both to reader plugins reading file formats
-and to function/dock widget plugins accepting layers and/or layer data.
-For example, if you know your plugin only works with 3D integer data in "tyx" order,
-make sure to mention this.
-
-If you know of researchers, groups or labs using your plugin, or if it has been cited
-anywhere, feel free to also include this information here.
-
-# Quickstart
-
-This section should go through step-by-step examples of how your plugin should be used.
-Where your plugin provides multiple dock widgets or functions, you should split these
-out into separate subsections for easy browsing. Include screenshots and videos
-wherever possible to elucidate your descriptions. 
-
-Ideally, this section should start with minimal examples for those who just want a
-quick overview of the plugin's functionality, but you should definitely link out to
-more complex and in-depth tutorials highlighting any intricacies of your plugin, and
-more detailed documentation if you have it.
-
-# Additional Install Steps (uncommon)
-We will be providing installation instructions on the hub, which will be sufficient
-for the majority of plugins. They will include instructions to pip install, and
-to install via napari itself.
-
-Most plugins can be installed out-of-the-box by just specifying the package requirements
-over in `setup.cfg`. However, if your plugin has any more complex dependencies, or 
-requires any additional preparation before (or after) installation, you should add 
-this information here.
-
-# Getting Help
-
-This section should point users to your preferred support tools, whether this be raising
-an issue on GitHub, asking a question on image.sc, or using some other method of contact.
-If you distinguish between usage support and bug/feature support, you should state that
-here.
-
-# How to Cite
-
-Many plugins may be used in the course of published (or publishable) research, as well as
-during conference talks and other public facing events. If you'd like to be cited in
-a particular format, or have a DOI you'd like used, you should provide that information here. -->
-
-The developer has not yet provided a napari-hub specific description.
+<!-- Movie here -->

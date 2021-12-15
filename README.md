@@ -1,11 +1,11 @@
-# nag-demo
+# workshop-demo
 
-[![License](https://img.shields.io/pypi/l/nag-demo.svg?color=green)](https://github.com/DragaDoncila/nag-demo/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/nag-demo.svg?color=green)](https://pypi.org/project/nag-demo)
-[![Python Version](https://img.shields.io/pypi/pyversions/nag-demo.svg?color=green)](https://python.org)
-[![tests](https://github.com/DragaDoncila/nag-demo/workflows/tests/badge.svg)](https://github.com/DragaDoncila/nag-demo/actions)
-[![codecov](https://codecov.io/gh/DragaDoncila/nag-demo/branch/main/graph/badge.svg)](https://codecov.io/gh/DragaDoncila/nag-demo)
-[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/nag-demo)](https://napari-hub.org/plugins/nag-demo)
+[![License](https://img.shields.io/pypi/l/workshop-demo.svg?color=green)](https://github.com/DragaDoncila/workshop-demo/raw/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/workshop-demo.svg?color=green)](https://pypi.org/project/workshop-demo)
+[![Python Version](https://img.shields.io/pypi/pyversions/workshop-demo.svg?color=green)](https://python.org)
+[![tests](https://github.com/DragaDoncila/workshop-demo/workflows/tests/badge.svg)](https://github.com/DragaDoncila/workshop-demo/actions)
+[![codecov](https://codecov.io/gh/DragaDoncila/workshop-demo/branch/main/graph/badge.svg)](https://codecov.io/gh/DragaDoncila/workshop-demo)
+[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/workshop-demo)](https://napari-hub.org/plugins/workshop-demo)
 
 A demo napari plugin incorporating reader, writer and dock widget contributions using the new npe2 plugin architecture.
 
@@ -23,16 +23,16 @@ https://napari.org/docs/plugins/index.html
 
 ## Installation
 
-You can install `nag-demo` via [pip]:
+You can install `workshop-demo` via [pip]:
 
-    pip install nag-demo
-
+    pip install workshop-demo
 
 
 To install latest development version :
 
-    pip install git+https://github.com/DragaDoncila/nag-demo.git
+    pip install git+https://github.com/DragaDoncila/workshop-demo.git
 
+@@include[DESCRIPTION.md](.napari/DESCRIPTION.md)
 
 ## Contributing
 
@@ -42,7 +42,7 @@ the coverage at least stays the same before you submit a pull request.
 ## License
 
 Distributed under the terms of the [BSD-3] license,
-"nag-demo" is free and open source software
+"workshop-demo" is free and open source software
 
 ## Issues
 
@@ -59,7 +59,7 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 [Mozilla Public License 2.0]: https://www.mozilla.org/media/MPL/2.0/index.txt
 [cookiecutter-napari-plugin]: https://github.com/napari/cookiecutter-napari-plugin
 
-[file an issue]: https://github.com/DragaDoncila/nag-demo/issues
+[file an issue]: https://github.com/DragaDoncila/workshop-demo/issues
 
 [napari]: https://github.com/napari/napari
 [tox]: https://tox.readthedocs.io/en/latest/

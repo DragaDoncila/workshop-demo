@@ -5,16 +5,16 @@ contributions:
   commands:
   - id: workshop-demo.get_reader
     python_name: workshop_demo._reader:napari_get_reader
-    title: NAG Reader
+    title: tracking challenge reader
 
   - id: workshop-demo.get_segment_widget
     python_name: workshop_demo._dock_widget:segment_by_threshold
-    title: Segment by Thresholding Title
+    title: open threshold widget
   - id: workshop-demo.get_highlight_widget
     python_name: workshop_demo._dock_widget:SegmentationDiffHighlight
     # doesn't show up anywhere right now but could be used for searching/filtering
     # what does the COMMAND do, not the action tied to the command e.g Open Highlight Widget
-    title: Highlight Segmentation Differences Title
+    title: open highlight widget
 
   - id: workshop-demo.write_labels
     python_name: workshop_demo._writer:labels_to_zip
