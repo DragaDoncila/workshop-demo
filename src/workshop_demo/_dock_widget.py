@@ -1,10 +1,12 @@
 """
-This module is an example of a barebones QWidget plugin for napari
+This module contains two barebones widgets for use as napari dock widgets.
 
-It implements the ``napari_experimental_provide_dock_widget`` hook specification.
-see: https://napari.org/docs/dev/plugins/hook_specifications.html
+One is built using magic_factory, abstracting away a lot of the complexity of
+managing the layout and basic functionality of your widget.
 
-Replace code below according to your needs.
+The second is built by subclassing QWidget directly. It provides a lot of
+flexibility for complex functionality, but requires more careful management
+and, of course, more code.
 """
 import numpy as np
 import dask.array as da
@@ -32,6 +34,7 @@ class Threshold(Enum):
     triangle = partial(threshold_triangle)
     yen = partial(threshold_yen)
 
+# our manifest widget command points to this function
 @magic_factory
 def segment_by_threshold(img_layer: "napari.layers.Image", threshold: Threshold) -> "napari.types.LayerDataTuple":
     """Returns segmented labels layer given an image layer and threshold function.
@@ -58,6 +61,7 @@ def segment_by_threshold(img_layer: "napari.layers.Image", threshold: Threshold)
 
     return seg_layer
 
+# our manifest widget command points to this class
 class SegmentationDiffHighlight(QWidget):
     """Widget allows selection of two labels layers and returns a new layer
     highlighing pixels whose values differ between the two layers."""

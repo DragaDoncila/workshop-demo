@@ -1,5 +1,7 @@
 """
-This module is an example of a barebones writer plugin for napari
+This module provides a labels writer for napari layers which writes
+a 2D+T sequence to a zipped file of T tiff files in a directory 
+structure similar to that of tracking challenge data.
 """
 
 from typing import List
@@ -30,6 +32,7 @@ def write_tiffs(data, dir_pth):
         imsave(tiff_pth, t_slice)
 
 
+# our manifest writer command points to this function.
 def labels_to_zip(path: str, layer_data_tuples: List["napari.types.LayerDataTuple"]) -> List[str]:
     """Save all 2D+T labels layers folder of individual 2D tiffs and zip. 
 
