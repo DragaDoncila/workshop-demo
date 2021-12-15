@@ -25,7 +25,7 @@ reader will attempt to find the number of frames of the associated sequence in a
 directory of the ground truth data directory and open a labels layer with the same number
 of frames, thus ensuring the labelled data is correctly overlaid onto the original sequence.
 
-<!-- Movie here -->
+https://user-images.githubusercontent.com/17995243/146114062-36124c05-f44a-488e-8991-f39a702c917f.mov
 
 ### Segmenting Data
 One of the dock widgets provided by this plugin is "Segment by Threshold". The widget
@@ -34,7 +34,7 @@ hepatocarcinoma dataset above) and segment it using a selection of scikit-image 
 
 The segmentation is then returned as a `Labels` layer into the viewer.
 
-<!-- Movie here -->
+https://user-images.githubusercontent.com/17995243/146114088-f6fb645e-8d78-4880-827b-2f0334dad859.mov
 
 ### Highlighting Segmentation Differences
 The second dock widget provided by this plugin allows you to visually compare your segmentation
@@ -43,7 +43,7 @@ layer in the napari viewer.
 
 To use this widget, open it from the Plugins menu and select the two layers you wish to compare.
 
-<!-- Movie here -->
+https://user-images.githubusercontent.com/17995243/146114112-c891723f-8640-4708-8014-c78731fb3396.mov
 
 ### Writing to Zip
 Finally, you can save your segmentation to a zip file whose internal directory structure
@@ -53,4 +53,4 @@ again in the viewer.
 To save your layer, choose File -> Save selected layer(s) with *one* labels layer selected,
 then select label zipper from the dropdown choices.
 
-<!-- Movie here -->
+https://user-images.githubusercontent.com/17995243/146114163-ee886990-979c-4756-97c5-aaf2c39dccde.mov
