@@ -1,27 +1,23 @@
 """
-This module is an example of a barebones numpy reader plugin for napari.
-
-It implements the ``napari_get_reader`` hook specification, (to create
-a reader plugin) but your plugin may choose to implement any of the hook
-specifications offered by napari.
-see: https://napari.org/docs/dev/plugins/hook_specifications.html
-
-Replace code below accordingly.  For complete documentation see:
-https://napari.org/docs/dev/plugins/for_plugin_developers.html
+This module contains the necessary functions to serve as a reader
+plugin for napari, that can read directories of tracking challenge
+gold standard manual segmentation data.
 """
-import warnings
-from napari.utils import progress
-import os
 import glob
+import os
 import re
+import warnings
+from pathlib import Path
+
 import dask
 import dask.array as da
-from pathlib import Path
-import numpy as np
 import tifffile
+from napari.utils import progress
 
-from ._constants import SEQ_TIF_REGEX, GT_REGEX, GT_TIF_REGEX
+from ._constants import GT_REGEX, GT_TIF_REGEX, SEQ_TIF_REGEX
 
+
+# our manifest reader command points to this function
 def napari_get_reader(path):
     """Returns reader if path contains valid tracking challenge ground truth tifs, otherwise None.
 
@@ -48,16 +44,17 @@ def napari_get_reader(path):
         return None
 
     # need to be able to find some tifs
-    all_tifs = glob.glob(path + '/*.tif')
+    all_tifs = glob.glob(path + "/*.tif")
     if not all_tifs:
         return None
-    
+
     # the tifs we've found need to match the regex for a ground truth tif
     is_gt_tifs = all([re.match(GT_TIF_REGEX, pth) for pth in all_tifs])
     if not is_gt_tifs:
         return None
 
     return reader_function
+
 
 def read_tifs(path, n_frames):
     """Read all tifs at path matching tif_regex into delayed dask stack.
@@ -74,7 +71,9 @@ def read_tifs(path, n_frames):
     """
 
     # sort all the tifs found at path that match the regex
-    all_tifs = sorted([pth for pth in glob.glob(path + '/*.tif') if re.match(GT_TIF_REGEX, pth)])
+    all_tifs = sorted(
+        pth for pth in glob.glob(path + "/*.tif") if re.match(GT_TIF_REGEX, pth)
+    )
 
     # open and inspect the first file so we can give a shape and dtype to the dask array
     tif_shape = None
@@ -105,6 +104,7 @@ def read_tifs(path, n_frames):
 
     return layer_data
 
+
 def reader_function(path):
     """Reads valid tracking challenge ground truth tifs at path and returns as napari layers.
 
@@ -134,10 +134,12 @@ def reader_function(path):
 
     n_frames = None
     if not os.path.exists(sister_sequence_pth):
-        warnings.warn(f"Can't find image for ground truth at {path}. Reading without knowing number of frames...")
+        warnings.warn(
+            f"Can't find image for ground truth at {path}. Reading without knowing number of frames..."
+        )
     else:
         # find the last tif in the sequence so we can work out the number of frames
-        latest_tif_pth = sorted(glob.glob(sister_sequence_pth + '/*.tif'))[-1]
+        latest_tif_pth = sorted(glob.glob(sister_sequence_pth + "/*.tif"))[-1]
         # split the number out of the filename and add 1 because we start at 0
         n_frames = int(re.match(SEQ_TIF_REGEX, latest_tif_pth).groups()[-1]) + 1
 
@@ -145,8 +147,8 @@ def reader_function(path):
     layer_type = "labels"
     layer_name = f"{gt_match.group(2)}{gt_match.group(3)}"
 
-    # optional kwargs for the corresponding viewer.add_* method 
+    # optional kwargs for the corresponding viewer.add_* method
     #    e.g. name, colormap, scale, etc.
-    add_kwargs = {'name': layer_name}
+    add_kwargs = {"name": layer_name}
 
     return [(layer_data, add_kwargs, layer_type)]
